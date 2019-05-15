@@ -108,6 +108,15 @@ def predict_vectors(user_ratings, similarities):
     # compute a weighted average (i.e. neighborhood is all) 
     return np.dot(relevant_ratings, similarities_s)/norm
 
+def mse(predicted_ratings):
+    """Computes the mean square error between actual ratings and predicted ratings
+    
+    Arguments:
+    predicted_ratings -- a dataFrame containing the columns rating and predicted rating
+    """
+    diff = predicted_ratings['rating'] - predicted_ratings['predicted rating']
+    return (diff**2).mean()
+
 series_ratings = dfmakercategories()
 df_utility_ratings = dfmakerratings()
 
