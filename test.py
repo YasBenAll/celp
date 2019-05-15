@@ -30,6 +30,24 @@ df_ratings['business_id'] = businesslist
 df_ratings['categories'] = categorieslist
 df_ratings['rating'] = starlist 
 
+def dfmakercategories():
+    businesslist = list()
+    categorieslist = list()
+
+    for city in CITIES:
+        for i in BUSINESSES[city]:
+            data = json.loads(json.dumps(i))
+            categories = data["categories"]
+            for j in list(categories.split(",")):
+                    newj = j.replace(" ", "")
+                    businesslist.append(data['business_id'])
+                    categorieslist.append(newj)
+
+    series_ratings = pd.DataFrame(columns=['business_id', 'categories'])
+    series_ratings['business_id'] = businesslist
+    series_ratings['categories'] = categorieslist
+    return series_ratings
+
 
 def dfmakerratings():
     # moet nog aangepast worden!
@@ -48,6 +66,7 @@ def dfmakerratings():
     series_ratings = pd.DataFrame(columns=['business_id', 'categories'])
     series_ratings['business_id'] = businesslist
     series_ratings['stars'] = categorieslist
+    print(series_ratings)
     return series_ratings
 
 def pivot_genres(df):
