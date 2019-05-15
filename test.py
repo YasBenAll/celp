@@ -7,7 +7,28 @@ import json
 import os
 import sklearn.metrics.pairwise as pw
 
-from data import BUSINESSES, CITIES
+from data import BUSINESSES, CITIES, REVIEWS
+
+# print(REVIEWS["sun city"])
+businesslist = list()
+categorieslist = list()
+starlist = list()
+useridlist = list()
+for review in REVIEWS["sun city"]:
+    useridlist.append(review['user_id'])
+    starlist.append(review['stars'])
+    businesslist.append(review['business_id'])
+    for city in CITIES:
+        for business in BUSINESSES[city]:
+            if business['business_id'] == review['business_id']:
+                categorieslist.append(business["categories"])
+
+df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating', 'categories'])
+df_ratings['user_id'] = useridlist
+df_ratings['business_id'] = businesslist
+df_ratings['categories'] = categorieslist
+df_ratings['rating'] = starlist
+print(df_ratings)
 
 def dfmakercategories():
     businesslist = list()
@@ -44,7 +65,7 @@ def dfmakerratings():
                     categorieslist.append(stars)
     series_ratings = pd.DataFrame(columns=['business_id', 'categories'])
     series_ratings['business_id'] = businesslist
-    series_ratings['categories'] = categorieslist
+    series_ratings['stars'] = categorieslist
     return series_ratings
 
 def pivot_genres(df):
