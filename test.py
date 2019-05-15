@@ -55,24 +55,28 @@ def dfmakercategories():
 
 
 def dfmakerratings():
-    # moet nog aangepast worden!
     businesslist = list()
     categorieslist = list()
-
-    for city in CITIES:
-        for i in BUSINESSES[city]:
-            data = json.loads(json.dumps(i))
-            categories = data["categories"]
-            stars = data["stars"]
-            for j in list(categories.split(",")):
-                    newj = j.replace(" ", "")
-                    businesslist.append(data['business_id'])
-                    categorieslist.append(stars)
-    series_ratings = pd.DataFrame(columns=['business_id', 'categories'])
-    series_ratings['business_id'] = businesslist
-    series_ratings['stars'] = categorieslist
-    # print(series_ratings)
-    return series_ratings
+    starlist = list()
+    useridlist = list()
+    for review in REVIEWS["sun city"]:
+        useridlist.append(review['user_id'])
+        starlist.append(review['stars'])
+        businesslist.append(review['business_id'])
+        for city in CITIES:
+            for business in BUSINESSES[city]:
+                if business['business_id'] == review['business_id']:
+                    data = json.loads(json.dumps(business))
+                    categories = data["categories"]
+                    categorieslist.append(categories)
+                    
+    df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating'])
+    df_ratings['user_id'] = useridlist
+    df_ratings['business_id'] = businesslist
+    df_ratings['rating'] = starlist 
+    # df_ratings = df_ratings.groupby('business_id')
+    # print(df_ratings)
+    return df_ratings
 
 def pivot_genres(df):
     """Create a one-hot encoded matrix for genres.
@@ -83,6 +87,17 @@ def pivot_genres(df):
     0: the movie does not have the genre
     """
     return df.pivot_table(index = 'business_id', columns = 'categories', aggfunc = 'size', fill_value=0)
+
+def pivot_ratings(df):
+    """Creates a utility matrix for user ratings for movies
+    
+    Arguments:
+    df -- a dataFrame containing at least the columns 'movieId' and 'genres'
+    
+    Output:
+    a matrix containing a rating in each cell. np.nan means that the user did not rate the movie
+    """
+    return df.pivot(values='rating', columns='user_id', index='business_id')
 
 def create_similarity_matrix_categories(matrix):
     """Create a  """
@@ -116,6 +131,7 @@ def predict_ids(similarity, utility, userId, itemId):
     # select right series from matrices and compute
     if userId in utility.columns and itemId in similarity.index:
         return predict_vectors(utility.loc[:,userId], similarity[itemId])
+    
     return 0
 
 def predict_vectors(user_ratings, similarities):
@@ -161,11 +177,16 @@ def split_data(data, d = 0.75):
 
 dfutility = pivot_genres(dfmakercategories())
 dfsimilarity = create_similarity_matrix_categories(dfutility)
-print(dfutility.columns)
+dfutilityratings = pivot_ratings(dfmakerratings())
+print(dfutilityratings)
+# print(dfmakerratings().groupby('user_id'))
+# print(dfutility.columns)
 # print(dfsimilarity) 
 df_ratings_training, df_ratings_test = split_data(dfmaker(), d=0.9)
 # print(dfutility)
 
 predicted_genres = predict_ratings(dfsimilarity, dfutility, df_ratings_test[['user_id', 'business_id', 'rating']])
 # mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 0.1])
-print(mse(predicted_genres))
+
+print(dfsimilarity.index)
+print(predicted_genres['predicted rating'].sum())
