@@ -37,11 +37,11 @@ def dfmakerratings():
         for i in BUSINESSES[city]:
             data = json.loads(json.dumps(i))
             categories = data["categories"]
+            stars = data["stars"]
             for j in list(categories.split(",")):
                     newj = j.replace(" ", "")
                     businesslist.append(data['business_id'])
-                    categorieslist.append(newj)
-
+                    categorieslist.append(stars)
     series_ratings = pd.DataFrame(columns=['business_id', 'categories'])
     series_ratings['business_id'] = businesslist
     series_ratings['categories'] = categorieslist
@@ -64,6 +64,7 @@ def create_similarity_matrix_categories(matrix):
     diag = np.diag(m1)
     m2 = m1 / diag
     m3 = np.minimum(m2, m2.T)
+    # print(pd.DataFrame(m3, index = matrix.index, columns = matrix.index))
     return pd.DataFrame(m3, index = matrix.index, columns = matrix.index)
 
 def predict_ratings(similarity, utility, to_predict):
@@ -79,6 +80,7 @@ def predict_ratings(similarity, utility, to_predict):
     ratings_test_c = to_predict.copy()
     # apply prediction to each row
     ratings_test_c['predicted rating'] = to_predict.apply(lambda row: predict_ids(similarity, utility, row['userId'], row['movieId']), axis=1)
+    # print(ratings_test_c)
     return ratings_test_c
 
 ### Helper functions for predict_ratings_item_based ###
@@ -115,6 +117,7 @@ def mse(predicted_ratings):
     predicted_ratings -- a dataFrame containing the columns rating and predicted rating
     """
     diff = predicted_ratings['rating'] - predicted_ratings['predicted rating']
+    print("MSE:", diff**2)
     return (diff**2).mean()
 
 series_ratings = dfmakercategories()
@@ -122,6 +125,6 @@ df_utility_ratings = dfmakerratings()
 
 df_utility_genres = pivot_genres(series_ratings)
 df_similarity_genres = create_similarity_matrix_categories(df_utility_genres)
-print(df_similarity_genres.head())
+# print(df_similarity_genres.head())
 predicted_genres = predict_ratings(df_similarity_genres, df_utility_ratings, df_ratings_test[['userId', 'movieId', 'rating']])
 mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 4.5])
