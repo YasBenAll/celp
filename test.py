@@ -185,7 +185,7 @@ print(dfutilityratings)
 df_ratings_training, df_ratings_test = split_data(dfmaker(), d=0.9)
 # print(dfutility)
 
-predicted_genres = predict_ratings(dfsimilarity, dfutility, df_ratings_test[['user_id', 'business_id', 'rating']])
+predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, df_ratings_test[['user_id', 'business_id', 'rating']])
 # mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 0.1])
 
 print(dfsimilarity.index)
