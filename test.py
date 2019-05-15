@@ -29,6 +29,7 @@ df_ratings['user_id'] = useridlist
 df_ratings['business_id'] = businesslist
 df_ratings['categories'] = categorieslist
 df_ratings['rating'] = starlist 
+df_ratings = df_ratings.groupby('business_id')
 
 def dfmakercategories():
     businesslist = list()
