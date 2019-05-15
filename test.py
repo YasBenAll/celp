@@ -9,7 +9,6 @@ import sklearn.metrics.pairwise as pw
 
 from data import BUSINESSES, CITIES, REVIEWS
 
-# print(REVIEWS["sun city"])
 businesslist = list()
 categorieslist = list()
 starlist = list()
@@ -21,32 +20,15 @@ for review in REVIEWS["sun city"]:
     for city in CITIES:
         for business in BUSINESSES[city]:
             if business['business_id'] == review['business_id']:
-                categorieslist.append(business["categories"])
-
+                data = json.loads(json.dumps(business))
+                categories = data["categories"]
+                categorieslist.append(categories)
+                
 df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating', 'categories'])
 df_ratings['user_id'] = useridlist
 df_ratings['business_id'] = businesslist
 df_ratings['categories'] = categorieslist
-df_ratings['rating'] = starlist
-print(df_ratings)
-
-def dfmakercategories():
-    businesslist = list()
-    categorieslist = list()
-
-    for city in CITIES:
-        for i in BUSINESSES[city]:
-            data = json.loads(json.dumps(i))
-            categories = data["categories"]
-            for j in list(categories.split(",")):
-                    newj = j.replace(" ", "")
-                    businesslist.append(data['business_id'])
-                    categorieslist.append(newj)
-
-    series_ratings = pd.DataFrame(columns=['business_id', 'categories'])
-    series_ratings['business_id'] = businesslist
-    series_ratings['categories'] = categorieslist
-    return series_ratings
+df_ratings['rating'] = starlist 
 
 
 def dfmakerratings():
