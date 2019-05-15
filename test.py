@@ -9,27 +9,31 @@ import sklearn.metrics.pairwise as pw
 
 from data import BUSINESSES, CITIES, REVIEWS
 
-businesslist = list()
-categorieslist = list()
-starlist = list()
-useridlist = list()
-for review in REVIEWS["sun city"]:
-    useridlist.append(review['user_id'])
-    starlist.append(review['stars'])
-    businesslist.append(review['business_id'])
-    for city in CITIES:
-        for business in BUSINESSES[city]:
-            if business['business_id'] == review['business_id']:
-                data = json.loads(json.dumps(business))
-                categories = data["categories"]
-                categorieslist.append(categories)
-                
-df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating', 'categories'])
-df_ratings['user_id'] = useridlist
-df_ratings['business_id'] = businesslist
-df_ratings['categories'] = categorieslist
-df_ratings['rating'] = starlist 
-df_ratings = df_ratings.groupby('business_id')
+def dfmaker():
+    businesslist = list()
+    categorieslist = list()
+    starlist = list()
+    useridlist = list()
+    for review in REVIEWS["sun city"]:
+        useridlist.append(review['user_id'])
+        starlist.append(review['stars'])
+        businesslist.append(review['business_id'])
+        for city in CITIES:
+            for business in BUSINESSES[city]:
+                if business['business_id'] == review['business_id']:
+                    data = json.loads(json.dumps(business))
+                    categories = data["categories"]
+                    categorieslist.append(categories)
+                    
+    df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating', 'categories'])
+    df_ratings['user_id'] = useridlist
+    df_ratings['business_id'] = businesslist
+    df_ratings['categories'] = categorieslist
+    df_ratings['rating'] = starlist 
+    # df_ratings = df_ratings.groupby('business_id')
+    # print(df_ratings)
+    return df_ratings
+
 
 def dfmakercategories():
     businesslist = list()
@@ -67,7 +71,7 @@ def dfmakerratings():
     series_ratings = pd.DataFrame(columns=['business_id', 'categories'])
     series_ratings['business_id'] = businesslist
     series_ratings['stars'] = categorieslist
-    print(series_ratings)
+    # print(series_ratings)
     return series_ratings
 
 def pivot_genres(df):
@@ -102,7 +106,7 @@ def predict_ratings(similarity, utility, to_predict):
     # copy input (don't overwrite)
     ratings_test_c = to_predict.copy()
     # apply prediction to each row
-    ratings_test_c['predicted rating'] = to_predict.apply(lambda row: predict_ids(similarity, utility, row['userId'], row['movieId']), axis=1)
+    ratings_test_c['predicted rating'] = to_predict.apply(lambda row: predict_ids(similarity, utility, row['user_id'], row['business_id']), axis=1)
     # print(ratings_test_c)
     return ratings_test_c
 
@@ -143,11 +147,25 @@ def mse(predicted_ratings):
     print("MSE:", diff**2)
     return (diff**2).mean()
 
-series_ratings = dfmakercategories()
-df_utility_ratings = dfmakerratings()
+def split_data(data, d = 0.75):
+    """Split data in a training and test set.
+    
+    Arguments:
+    data -- any dataFrame.
+    d    -- the fraction of data in the training set
+    """
+    np.random.seed(seed=5)
+    mask_test = np.random.rand(data.shape[0]) < d
+    return data[mask_test], data[~mask_test]
 
-df_utility_genres = pivot_genres(series_ratings)
-df_similarity_genres = create_similarity_matrix_categories(df_utility_genres)
-# print(df_similarity_genres.head())
-predicted_genres = predict_ratings(df_similarity_genres, df_utility_ratings, df_ratings_test[['userId', 'movieId', 'rating']])
-mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 4.5])
+
+dfutility = pivot_genres(dfmakercategories())
+dfsimilarity = create_similarity_matrix_categories(dfutility)
+print(dfutility.columns)
+# print(dfsimilarity) 
+df_ratings_training, df_ratings_test = split_data(dfmaker(), d=0.9)
+# print(dfutility)
+
+predicted_genres = predict_ratings(dfsimilarity, dfutility, df_ratings_test[['user_id', 'business_id', 'rating']])
+# mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 0.1])
+print(mse(predicted_genres))
