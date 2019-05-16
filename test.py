@@ -30,7 +30,7 @@ def dfmaker():
     df_ratings['business_id'] = businesslist
     df_ratings['categories'] = categorieslist
     df_ratings['rating'] = starlist 
-    # df_ratings = df_ratings.groupby('business_id')
+    # df_ratings = df_ratings.groupby('user_id')
     # print(df_ratings)
     return df_ratings
 
@@ -63,18 +63,19 @@ def dfmakerratings():
         useridlist.append(review['user_id'])
         starlist.append(review['stars'])
         businesslist.append(review['business_id'])
-        for city in CITIES:
-            for business in BUSINESSES[city]:
-                if business['business_id'] == review['business_id']:
-                    data = json.loads(json.dumps(business))
-                    categories = data["categories"]
-                    categorieslist.append(categories)
+        # for city in CITIES:
+        #     for business in BUSINESSES[city]:
+        #         if business['business_id'] == review['business_id']:
+        #             data = json.loads(json.dumps(business))
+        #             categories = data["categories"]
+        #             categorieslist.append(categories)
                     
     df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating'])
     df_ratings['user_id'] = useridlist
     df_ratings['business_id'] = businesslist
     df_ratings['rating'] = starlist 
-    # df_ratings = df_ratings.groupby('business_id')
+    df_ratings = df_ratings.sort_values(by='user_id')
+    df_ratings = df_ratings.drop_duplicates()
     # print(df_ratings)
     return df_ratings
 
@@ -97,7 +98,7 @@ def pivot_ratings(df):
     Output:
     a matrix containing a rating in each cell. np.nan means that the user did not rate the movie
     """
-    return df.pivot(values='rating', columns='user_id', index='business_id')
+    return df.pivot_table(values='rating', columns='user_id', index='business_id')
 
 def create_similarity_matrix_categories(matrix):
     """Create a  """
@@ -178,7 +179,7 @@ def split_data(data, d = 0.75):
 dfutility = pivot_genres(dfmakercategories())
 dfsimilarity = create_similarity_matrix_categories(dfutility)
 dfutilityratings = pivot_ratings(dfmakerratings())
-print(dfutilityratings)
+# print(dfutilityratings)
 # print(dfmakerratings().groupby('user_id'))
 # print(dfutility.columns)
 # print(dfsimilarity) 
@@ -188,5 +189,5 @@ df_ratings_training, df_ratings_test = split_data(dfmaker(), d=0.9)
 predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, df_ratings_test[['user_id', 'business_id', 'rating']])
 # mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 0.1])
 
-print(dfsimilarity.index)
-print(predicted_genres['predicted rating'].sum())
+# print(dfsimilarity.index)
+print(predicted_genres)
