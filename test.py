@@ -164,7 +164,7 @@ def mse(predicted_ratings):
     predicted_ratings -- a dataFrame containing the columns rating and predicted rating
     """
     diff = predicted_ratings['rating'] - predicted_ratings['predicted rating']
-    print("MSE:", diff**2)
+    # print("MSE:", diff**2)
     return (diff**2).mean()
 
 def split_data(data, d = 0.75):
@@ -191,13 +191,40 @@ df = dfmaker()
 # print(dfutility)
 # print(df)
 
-predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, df[['user_id', 'business_id', 'rating']])
+# predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, df[['user_id', 'business_id', 'rating']])
 # mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 0.1])
 
 # print(dfsimilarity.index)
-print(predicted_genres)
+
+# print(predicted_genres)
+
+predicted_genres_test = predict_ratings(dfsimilarity, dfutilityratings, df_ratings_test[['user_id', 'business_id', 'rating']])
+mse = mse(predicted_genres_test[predicted_genres_test['predicted rating'] > 0.1])
+print(mse)
 # df_ratings_test_copy = df_ratings_test.copy()
 # df_ratings_test_copy['predicted rating'] = np.random.uniform(low=0.5, high=5, size=(len(df_ratings_test),))
 
 # mse_random = mse(df_ratings_test_copy)
 # print(f'mse for random prediction: {mse_random:.2f}')
+
+def dfmakerhaha():
+    businesslist = list()
+    categorieslist = list()
+    starlist = list()
+    useridlist = list()
+    for city in CITIES:
+        for user in USERS[city]:
+            for business in BUSINESSES[city]:
+                useridlist.append(user['user_id'])
+                businesslist.append(business['business_id'])
+                categorieslist.append(business['categories'])
+                starlist.append(np.nan)
+                    
+    df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating', 'categories'])
+    df_ratings['user_id'] = useridlist
+    df_ratings['business_id'] = businesslist
+    df_ratings['categories'] = categorieslist
+    df_ratings['rating'] = starlist 
+    df_ratings = df_ratings.sort_values(by='user_id')
+    return df_ratings
+he = dfmakerhaha()
