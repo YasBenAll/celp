@@ -178,56 +178,63 @@ def split_data(data, d = 0.75):
     mask_test = np.random.rand(data.shape[0]) < d
     return data[mask_test], data[~mask_test]
 
+def dfmakersuited(city, user_id):
+    businesslist = list()
+    categorieslist = list()
+    starlist = list()
+    useridlist = list()
+    
+    for review in REVIEWS[city]:
+        if review['user_id'] == user_id:
+            useridlist.append(review['user_id'])
+            starlist.append(review['stars'])
+            businesslist.append(review['business_id'])
 
+        
+    for business in BUSINESSES[city]:
+        if business['business_id'] not in businesslist:
+            businesslist.append(business['business_id'])
+            starlist.append(np.nan)
+            useridlist.append(user_id)
+                    
+    df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating'])
+    df_ratings['user_id'] = useridlist
+    df_ratings['business_id'] = businesslist
+    df_ratings['rating'] = starlist 
+    # df_ratings = df_ratings.sort_values(by='user_id')
+    # df_ratings = df_ratings.groupby('user_id')
+    # print(df_ratings)
+    return df_ratings
+
+
+# new test
+dfratings = dfmakersuited("sun city", "DAIpUGIsY71noX0wNuc27w") 
 dfutility = pivot_genres(dfmakercategories())
 dfsimilarity = create_similarity_matrix_categories(dfutility)
-dfutilityratings = pivot_ratings(dfmakerratings())
-# print(dfutilityratings)
-# print(dfmakerratings().groupby('user_id'))
-# print(dfutility.columns)
-# print(dfsimilarity) 
-df_ratings_training, df_ratings_test = split_data(dfmaker(), d=0.9)
-df = dfmaker()
+dfutilityratings = pivot_ratings(dfratings)
+predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, dfratings[['user_id', 'business_id', 'rating']])
+print(mse(predicted_genres))
+# old test
+# dfutility = pivot_genres(dfmakercategories())
+# dfsimilarity = create_similarity_matrix_categories(dfutility)
+# dfutilityratings = pivot_ratings(dfmakerratings())
+
+# df_ratings_training, df_ratings_test = split_data(dfmaker(), d=0.9)
+# df = dfmaker()
+
+
+
+
+
 # print(dfutility)
 # print(df)
 
 # predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, df[['user_id', 'business_id', 'rating']])
 # mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 0.1])
 
-# print(dfsimilarity.index)
 
-# print(predicted_genres)
-
-predicted_genres_test = predict_ratings(dfsimilarity, dfutilityratings, df_ratings_test[['user_id', 'business_id', 'rating']])
-mse = mse(predicted_genres_test[predicted_genres_test['predicted rating'] > 0.1])
-print(mse)
 # df_ratings_test_copy = df_ratings_test.copy()
 # df_ratings_test_copy['predicted rating'] = np.random.uniform(low=0.5, high=5, size=(len(df_ratings_test),))
 
 # mse_random = mse(df_ratings_test_copy)
 # print(f'mse for random prediction: {mse_random:.2f}')
-
-def dfmakerhaha():
-    businesslist = list()
-    categorieslist = list()
-    starlist = list()
-    useridlist = list()
-    for city in CITIES:
-        for user in USERS[city]:
-            for business in BUSINESSES[city]:
-                useridlist.append(user['user_id'])
-                businesslist.append(business['business_id'])
-                categorieslist.append(business['categories'])
-                starlist.append(np.nan)
-                    
-    df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating', 'categories'])
-    df_ratings['user_id'] = useridlist
-    df_ratings['business_id'] = businesslist
-    df_ratings['categories'] = categorieslist
-    df_ratings['rating'] = starlist 
-    df_ratings = df_ratings.sort_values(by='user_id')
-    return df_ratings
-he = dfmakerhaha()
-
-for i in he['user_id']: 
-    df.loc[he['user_id'] == i, 'rating']
