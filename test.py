@@ -7,7 +7,7 @@ import json
 import os
 import sklearn.metrics.pairwise as pw
 
-from data import BUSINESSES, CITIES, REVIEWS
+from data import BUSINESSES, CITIES, REVIEWS, USERS
 
 def dfmaker():
     businesslist = list()
@@ -228,3 +228,6 @@ def dfmakerhaha():
     df_ratings = df_ratings.sort_values(by='user_id')
     return df_ratings
 he = dfmakerhaha()
+
+for i in he['user_id']: 
+    df.loc[he['user_id'] == i, 'rating']
