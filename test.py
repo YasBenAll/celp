@@ -31,7 +31,7 @@ def dfmaker():
     df_ratings['business_id'] = businesslist
     df_ratings['categories'] = categorieslist
     df_ratings['rating'] = starlist 
-    df_ratings = df_ratings.sort_values(by='user_id')
+    # df_ratings = df_ratings.sort_values(by='user_id')
     # df_ratings = df_ratings.groupby('user_id')
     # print(df_ratings)
     return df_ratings
@@ -77,7 +77,7 @@ def dfmakerratings():
     df_ratings['user_id'] = useridlist
     df_ratings['business_id'] = businesslist
     df_ratings['rating'] = starlist 
-    df_ratings = df_ratings.sort_values(by='user_id')
+    # df_ratings = df_ratings.sort_values(by='user_id')
     # df_ratings = df_ratings.drop_duplicates()
     # print(df_ratings)
     return df_ratings
@@ -191,7 +191,7 @@ df = dfmaker()
 # print(dfutility)
 # print(df)
 
-predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, df[['user_id', 'business_id', 'rating']])
+predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, df_ratings_test[['user_id', 'business_id', 'rating']])
 # mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 0.1])
 
 # print(dfsimilarity.index)
