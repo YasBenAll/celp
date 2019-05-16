@@ -14,22 +14,24 @@ def dfmaker():
     categorieslist = list()
     starlist = list()
     useridlist = list()
-    for review in REVIEWS["sun city"]:
-        useridlist.append(review['user_id'])
-        starlist.append(review['stars'])
-        businesslist.append(review['business_id'])
-        for city in CITIES:
-            for business in BUSINESSES[city]:
-                if business['business_id'] == review['business_id']:
-                    data = json.loads(json.dumps(business))
-                    categories = data["categories"]
-                    categorieslist.append(categories)
+    for city in CITIES:
+        for review in REVIEWS[city]:
+            useridlist.append(review['user_id'])
+            starlist.append(review['stars'])
+            businesslist.append(review['business_id'])
+            for city in CITIES:
+                for business in BUSINESSES[city]:
+                    if business['business_id'] == review['business_id']:
+                        data = json.loads(json.dumps(business))
+                        categories = data["categories"]
+                        categorieslist.append(categories)
                     
     df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating', 'categories'])
     df_ratings['user_id'] = useridlist
     df_ratings['business_id'] = businesslist
     df_ratings['categories'] = categorieslist
     df_ratings['rating'] = starlist 
+    df_ratings = df_ratings.sort_values(by='user_id')
     # df_ratings = df_ratings.groupby('user_id')
     # print(df_ratings)
     return df_ratings
@@ -59,23 +61,24 @@ def dfmakerratings():
     categorieslist = list()
     starlist = list()
     useridlist = list()
-    for review in REVIEWS["sun city"]:
-        useridlist.append(review['user_id'])
-        starlist.append(review['stars'])
-        businesslist.append(review['business_id'])
-        # for city in CITIES:
-        #     for business in BUSINESSES[city]:
-        #         if business['business_id'] == review['business_id']:
-        #             data = json.loads(json.dumps(business))
-        #             categories = data["categories"]
-        #             categorieslist.append(categories)
+    for city in CITIES:
+        for review in REVIEWS[city]:
+            useridlist.append(review['user_id'])
+            starlist.append(review['stars'])
+            businesslist.append(review['business_id'])
+            # for city in CITIES:
+            #     for business in BUSINESSES[city]:
+            #         if business['business_id'] == review['business_id']:
+            #             data = json.loads(json.dumps(business))
+            #             categories = data["categories"]
+            #             categorieslist.append(categories)
                     
     df_ratings = pd.DataFrame(columns=['user_id', 'business_id', 'rating'])
     df_ratings['user_id'] = useridlist
     df_ratings['business_id'] = businesslist
     df_ratings['rating'] = starlist 
     df_ratings = df_ratings.sort_values(by='user_id')
-    df_ratings = df_ratings.drop_duplicates()
+    # df_ratings = df_ratings.drop_duplicates()
     # print(df_ratings)
     return df_ratings
 
@@ -184,10 +187,17 @@ dfutilityratings = pivot_ratings(dfmakerratings())
 # print(dfutility.columns)
 # print(dfsimilarity) 
 df_ratings_training, df_ratings_test = split_data(dfmaker(), d=0.9)
+df = dfmaker()
 # print(dfutility)
+# print(df)
 
-predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, df_ratings_test[['user_id', 'business_id', 'rating']])
+predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, df[['user_id', 'business_id', 'rating']])
 # mse_top_rated_content_based = mse(predicted_genres[predicted_genres['predicted rating'] > 0.1])
 
 # print(dfsimilarity.index)
 print(predicted_genres)
+# df_ratings_test_copy = df_ratings_test.copy()
+# df_ratings_test_copy['predicted rating'] = np.random.uniform(low=0.5, high=5, size=(len(df_ratings_test),))
+
+# mse_random = mse(df_ratings_test_copy)
+# print(f'mse for random prediction: {mse_random:.2f}')
