@@ -213,7 +213,7 @@ dfutility = pivot_genres(dfmakercategories())
 dfsimilarity = create_similarity_matrix_categories(dfutility)
 dfutilityratings = pivot_ratings(dfratings)
 predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, dfratings[['user_id', 'business_id', 'rating']])
-print(mse(predicted_genres))
+# print(mse(predicted_genres))
 # old test
 # dfutility = pivot_genres(dfmakercategories())
 # dfsimilarity = create_similarity_matrix_categories(dfutility)

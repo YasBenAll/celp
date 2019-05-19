@@ -6,8 +6,8 @@ import json
 import os
 import sklearn.metrics.pairwise as pw
 from test import dfmakersuited, pivot_genres, create_similarity_matrix_categories, pivot_ratings, predict_ratings, dfmakercategories
-from data import CITIES, BUSINESSES, USERS, REVIEWS, TIPS, CHECKINS, get_business
-
+from data import CITIES, BUSINESSES, USERS, REVIEWS, TIPS, CHECKINS, get_business, load
+DATA_DIR = "data"
 import random
 
 
@@ -25,25 +25,35 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
             adress:str
         }
     """
-    if not user_id:
-        user_id = "DAIpUGIsY71noX0wNuc27w"
+    # if not user_id:
+    #     user_id = "DAIpUGIsY71noX0wNuc27w"
     if not city:
         city = random.choice(CITIES)
-
+    # if not business_id:
+    #     business_id = "XieY4CeZOw9bMBk965BNTw"
+    # print(user_id)
+    
     dfratings = dfmakersuited(city, user_id)
     dfutility = pivot_genres(dfmakercategories())
     dfsimilarity = create_similarity_matrix_categories(dfutility)
     dfutilityratings = pivot_ratings(dfratings)
     predicted_genres = predict_ratings(dfsimilarity, dfutilityratings, dfratings[['user_id', 'business_id', 'rating']])
-    sortedpredicted = predicted_genres.sort_values(by='predicted rating', ascending = False).iloc[0:10]
-
-    # print(sortedpredicted.set_index('business_id')['predicted rating'].to_dict())
-
-    return random.sample(BUSINESSES[city], n)
+    sortedpredicted = predicted_genres.sort_values(by='predicted rating', ascending = False).iloc[0:n]
+    sorteddict = sortedpredicted.set_index('business_id')['predicted rating'].to_dict()
+    # print(sorteddict.keys())
+    # return random.sample(BUSINESSES[city], n)
     recommendlist = list()
-    for i in sortedpredicted.keys():
+    cities = list()
+    cities.append(city)
+    for i in sorteddict.keys():
         recommendlist.append(get_business(city, i))
+    # print(random.choice(list(load(cities, "business").values())[0])["business_id"])
+    recommendlist.append(get_business(city, random.choice(list(load(cities, "business").values())[0])["business_id"]))
+    # print(recommendlist)
+    # print(predicted_genres)
     return recommendlist
+
+# print(recommend())
 
 
 
