@@ -1,3 +1,4 @@
+Het account dat heeft gepusht onder de naam Pink to the Future is per ongeluk gebeurd. 
 # Celp
 
 This is Collective Yelp, a business recommendation website based on Yelp data. This is the distribution code for the Celp assignment of the [Collective Intelligence course](https://ci.mprog.nl) at the University of Amsterdam.
